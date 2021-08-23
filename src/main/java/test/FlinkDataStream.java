@@ -4,11 +4,11 @@ import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
+import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.util.Collector;
-import org.apache.kafka.common.protocol.types.Field;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 import java.util.*;
 
@@ -16,6 +16,7 @@ import java.util.*;
 public class FlinkDataStream {
     public static void main(String[] args) throws Exception {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
         DataStream<String> stringDataStream = KafkaProp(env);
 //        stringDataStream.print();
 
@@ -35,6 +36,7 @@ public class FlinkDataStream {
             }
         );
 
+
         output.print();
 
         env.execute("Flink-Kafka Demo");
@@ -48,4 +50,14 @@ public class FlinkDataStream {
 
         return env.addSource(new FlinkKafkaConsumer<>("test", new SimpleStringSchema(), properties));
     }
+
+    private TableEnvironment TableEnvCreate(String TableName){
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamTableEnvironment streamTableEnvironment = StreamTableEnvironment.create(env);
+        StringBuilder CreateTable = new StringBuilder();
+        CreateTable.append("CREATE TABLE ").append(TableName).append(" ").append("(");
+        streamTableEnvironment.executeSql(String.valueOf(CreateTable));
+        return streamTableEnvironment;
+    }
+
 }
